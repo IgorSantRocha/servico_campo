@@ -73,13 +73,7 @@
                             />
                             <field name="person_id" />
                             <field name="internal_type" invisible="1" />
-                            <field
-                                name="equipment_id"
-                                invisible="internal_type not in ['repair', 'maintenance']"
-                                groups="fieldservice.group_fsm_equipment"
-                                options="{'no_create': True}"
-                                domain="[('current_location_id','=',location_id)]"
-                            />
+                            <field name="equipment_id" invisible="1" attrs="{'invisible': [('internal_type', 'not in', ['repair', 'maintenance'])]}" ... />
                             <field
                                 name="company_id"
                                 options="{'no_create': True}"
