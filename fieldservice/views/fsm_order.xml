@@ -95,7 +95,7 @@
                                 <field name="name"/>
                                 <field name="person_id"/>
                                 <field name="location_id"/>
-                                <field name="current_location_id" attrs="{'invisible': [('current_location_id', '=', False)]}"/>
+                                <!--<field name="current_location_id" attrs="{'invisible': [('current_location_id', '=', False)]}"/>-->
                                 <field name="stage_id"/>
                             </tree>
                         </page>
