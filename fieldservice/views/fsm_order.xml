@@ -174,9 +174,8 @@
                             string="Equipments"
                             groups="fieldservice.group_fsm_equipment"
                             name="equipements_page"
-                            invisible="internal_type in ['repair', 'maintenance']"
-                        >
-                                <field name="equipment_ids" required="stage_id not in ['repair', 'maintenance']"/>
+                            invisible="internal_type in ['repair', 'maintenance']">
+                            <field name="equipment_ids" required="stage_id not in ['repair', 'maintenance']">
                                 <tree>
                                     <field name="name" />
                                     <field name="person_id" />
