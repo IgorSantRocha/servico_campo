@@ -1,268 +1,201 @@
 <odoo>
-    <!-- Field Service Location Tree View-->
-    <record id="fsm_location_tree_view" model="ir.ui.view">
-        <field name="name">fsm.location.tree</field>
-        <field name="model">fsm.location</field>
+    <!-- Operations -->
+    <record id="fsm_order_form" model="ir.ui.view">
+        <field name="name">fsm.order.form</field>
+        <field name="model">fsm.order</field>
         <field name="arch" type="xml">
-            <tree>
-                <field name="ref" />
-                <field name="complete_name" />
-                <field
-                    name="category_id"
-                    widget="many2many_tags"
-                    options="{'color_field': 'color'}"
-                />
-                <field name="stage_id" />
-                <field name="street" />
-                <field name="street2" />
-                <field name="city" />
-                <field name="state_id" />
-                <field name="zip" />
-                <field name="territory_id" groups="fieldservice.group_fsm_territory" />
-                <field name="owner_id" />
-            </tree>
-        </field>
-    </record>
-    <!-- Field Service Location Form View-->
-    <record id="fsm_location_form_view" model="ir.ui.view">
-        <field name="name">fsm.location.form</field>
-        <field name="model">fsm.location</field>
-        <field name="arch" type="xml">
-            <form string="Location">
+            <form string="Order">
                 <header>
+                    <field name="is_button" invisible="1" />
+                    <field name="team_id" invisible="1" />
                     <button
-                        id="previous_stage"
-                        name="previous_stage"
-                        string="Previous Stage"
+                        id="action_complete"
+                        name="action_complete"
+                        string="Complete"
                         class="oe_highlight"
                         type="object"
-                        groups="fieldservice.group_fsm_dispatcher"
+                        groups="fieldservice.group_fsm_user"
+                        invisible="stage_id.is_closed"
                     />
                     <button
-                        id="next_stage"
-                        name="next_stage"
-                        string="Next Stage"
-                        class="oe_highlight"
+                        id="action_cancel"
+                        name="action_cancel"
+                        string="Cancel Order"
                         type="object"
                         groups="fieldservice.group_fsm_dispatcher"
+                        invisible="stage_id.is_closed"
                     />
                     <field
                         name="stage_id"
                         widget="statusbar"
-                        domain="[('stage_type', '=', 'location')]"
+                        options="{'fold_field': 'fold'}"
+                        domain="[('stage_type', '=', 'order'), '|', ('team_ids', 'in', team_id), ('team_ids', '=', False)]"
                     />
                 </header>
                 <sheet>
-                    <div class="oe_button_box" name="button_box">
-                        <button
-                            type="object"
-                            name="action_view_sublocation"
-                            class="oe_stat_button"
-                            icon="fa-location-arrow"
-                        >
-                            <field
-                                name="sublocation_count"
-                                widget="statinfo"
-                                string="Sub-Locations"
-                            />
-                        </button>
-                        <button
-                            type="object"
-                            name="action_view_equipment"
-                            class="oe_stat_button"
-                            icon="fa-briefcase"
-                            groups="fieldservice.group_fsm_equipment"
-                        >
-                            <field
-                                name="equipment_count"
-                                widget="statinfo"
-                                string="Equipment"
-                            />
-                        </button>
-                        <button
-                            type="object"
-                            name="action_view_contacts"
-                            class="oe_stat_button"
-                            icon="fa-user-circle-o"
-                            groups="base.group_user"
-                            context="{'default_street': street, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id}"
-                        >
-                            <field
-                                name="contact_count"
-                                widget="statinfo"
-                                string="Contacts"
-                            />
-                        </button>
+                    <div class="oe_button_box" name="button_box" />
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1" />
+                        </h1>
                     </div>
-                    <label for="name" class="oe_edit_only" />
-                    <h1>
-                        <field name="name" required="True" />
-                    </h1>
                     <group>
-                        <group id="main-left">
-                            <field name="id" invisible="1" />
-                            <field name="fsm_parent_id" domain="[('id', '!=', id)]" />
+                        <group>
                             <field
-                                name="partner_id"
-                                groups="base.group_no_one"
-                                readonly="1"
+                                name="template_id"
+                                groups="fieldservice.group_fsm_template"
                             />
-                            <field name="owner_id" />
                             <field
-                                name="contact_id"
-                                context="{'default_service_location_id': id, 'default_street': street, 'default_street2': street2, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id}"
+                                name="type"
+                                options="{'no_create': True, 'no_open': True}"
                             />
-                            <field name="phone" widget="phone" />
-                            <field name="email" widget="email" />
-                            <label for="street" string="Address" />
-                            <div class="o_address_format">
-                                <field
-                                    name="street"
-                                    placeholder="Street..."
-                                    class="o_address_street"
-                                />
-                                <field
-                                    name="street2"
-                                    placeholder="Street 2..."
-                                    class="o_address_street"
-                                />
-                                <field
-                                    name="city"
-                                    placeholder="City"
-                                    class="o_address_city"
-                                />
-                                <field
-                                    name="state_id"
-                                    class="o_address_state"
-                                    placeholder="State"
-                                    options="{&quot;no_open&quot;: True}"
-                                    context="{'country_id': country_id, 'zip': zip}"
-                                />
-                                <field
-                                    name="zip"
-                                    placeholder="ZIP"
-                                    class="o_address_zip"
-                                />
-                                <field
-                                    name="country_id"
-                                    placeholder="Country"
-                                    class="o_address_country"
-                                    options="{&quot;no_open&quot;: True, &quot;no_create&quot;: True}"
-                                />
-                            </div>
-                        </group>
-                        <group id="main-right">
-                            <field name="ref" />
-                            <field name="description" />
-                            <field name="tz" />
-                            <field name="calendar_id" />
+                            <field name="priority" widget="priority" />
                             <field
-                                name="category_id"
+                                name="tag_ids"
                                 widget="many2many_tags"
-                                options="{'color_field': 'color'}"
+                                groups="fieldservice.group_fsm_tag"
+                                options="{'color_field': 'color', 'no_create_edit': True}"
+                            />
+                        </group>
+                        <group>
+                            <field name="location_id" />
+                            <field
+                                name="territory_id"
+                                invisible='1'
+                                groups="fieldservice.group_fsm_territory"
+                            />
+                            <field name="branch_id" invisible='1' />
+                            <field name="district_id" invisible='1' />
+                            <field name="region_id" invisible='1' />
+                            <field
+                                name="team_id"
+                                groups="fieldservice.group_fsm_team"
+                            />
+                            <field name="person_id" />
+                            <field name="internal_type" invisible="1" />
+                            <field
+                                name="equipment_id"
+                                invisible="internal_type not in ['repair', 'maintenance']"
+                                groups="fieldservice.group_fsm_equipment"
+                                options="{'no_create': True}"
+                                domain="[('current_location_id','=',location_id)]"
+                            />
+                            <field
+                                name="company_id"
+                                options="{'no_create': True}"
+                                groups="base.group_multi_company"
                             />
                         </group>
                     </group>
-                    <group string="General Notes">
-                        <field name="notes" nolabel="1" colspan="2" widget="html" />
+                    <group string="Description" name="description_grp">
+                        <field
+                            name="description"
+                            nolabel="1"
+                            colspan="2"
+                            placeholder="Add a description for the order..."
+                        />
+                    </group>
+                    <group string="Resolution" name="resolution_grp">
+                        <field
+                            name="resolution"
+                            nolabel="1"
+                            colspan="2"
+                            placeholder="Enter the resolution for the order..."
+                        />
                     </group>
                     <notebook>
-                        <page string="Directions" name="directions">
-                            <field
-                                name="direction"
-                                nolabel="1"
-                                colspan="2"
-                                widget="html"
-                            />
+                        <page string="Planning" name="planning_page">
+                            <group>
+                                <group string="Requirements" name="requirements_grp">
+                                    <field
+                                        name="category_ids"
+                                        widget="many2many_tags"
+                                        options="{'color_field': 'color'}"
+                                        groups="fieldservice.group_fsm_category"
+                                    />
+                                    <field name="request_early" />
+                                    <field name="request_late" />
+                                </group>
+                                <group id="schedule" string="Schedule Details">
+                                    <field name="scheduled_date_start" />
+                                    <field name="scheduled_duration" />
+                                    <field name="scheduled_date_end" readonly="1" />
+                                </group>
+                            </group>
+                            <group string="Request Workers" name="request_workers">
+                                <field
+                                    name="person_ids"
+                                    widget="many2many"
+                                    nolabel="1"
+                                    colspan="2"
+                                    context="{'search_default_location_ids': location_id}"
+                                >
+                                    <tree>
+                                        <field name="name" />
+                                        <field name="phone" />
+                                        <field name="email" />
+                                        <field
+                                            name="category_ids"
+                                            widget="many2many_tags"
+                                            options="{'color_field': 'color'}"
+                                            groups="fieldservice.group_fsm_category"
+                                        />
+                                        <field name="calendar_id" />
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Instructions" name="instructions_page">
+                            <group string="Instructions" name="instructions_grp">
+                                <field
+                                    name="todo"
+                                    nolabel="1"
+                                    colspan="2"
+                                    widget="html"
+                                />
+                            </group>
+                            <group
+                                string="Location Directions"
+                                name="location_directions_grp"
+                            >
+                                <field
+                                    name="location_directions"
+                                    nolabel="1"
+                                    colspan="2"
+                                    widget="html"
+                                />
+                            </group>
+                        </page>
+                        <page string="Execution" name="execution_page">
+                            <group>
+                                <group id="execution-left">
+                                    <field name="date_start" />
+                                    <field name="date_end" />
+                                    <field name="duration" readonly="1" />
+                                </group>
+                                <group id="execution-right" />
+                            </group>
                         </page>
                         <page
-                            string="Territory"
-                            name="territory"
-                            groups="fieldservice.group_fsm_territory"
+                            string="Equipments"
+                            groups="fieldservice.group_fsm_equipment"
+                            name="equipements_page"
+                            invisible="internal_type in ['repair', 'maintenance']"
                         >
-                            <group id="territory">
-                                <group id="territory-left">
-                                    <field name="territory_id" />
-                                    <field name="branch_id" />
-                                    <field name="district_id" />
-                                    <field name="region_id" />
-                                </group>
-                                <group id="territory-right">
-                                    <field name="territory_manager_id" />
-                                    <field name="branch_manager_id" />
-                                    <field name="district_manager_id" />
-                                    <field name="region_manager_id" />
-                                </group>
-                            </group>
-                        </page>
-                        <page string="Preferred Workers" name="preferred_workers">
-                            <field name="person_ids" nolabel="1">
-                                <tree editable="bottom">
-                                    <field name="sequence" widget="handle" />
+                            <field
+                                name="equipment_ids"
+                                required="internal_type not in ['repair', 'maintenance']"
+                                options="{'no_create': True}"
+                                domain="[('current_location_id','=',location_id)]"
+                            >
+                                <tree>
+                                    <field name="name" />
                                     <field name="person_id" />
-                                    <field name="phone" />
-                                    <field name="email" />
+                                    <field name="location_id" />
+                                    <field name="current_location_id" />
+                                    <field name="stage_id" />
                                 </tree>
                             </field>
-                        </page>
-                        <page string="Others" id="others-page" name="others">
-                            <group id="others">
-                                <group id="others-left" />
-                                <group id="others-right" />
-                            </group>
-                        </page>
-                        <page string="Geo Location" name="geo_location">
-                            <group id="get_locate">
-                                <group string="Geolocation">
-                                    <label
-                                        for="date_localization"
-                                        string="Geo Location"
-                                    />
-                                    <div>
-                                        <span>Lat: <field
-                                                name="partner_latitude"
-                                                nolabel="1"
-                                                class="oe_inline"
-                                            /></span>
-                                        <br />
-                                        <span>Long: <field
-                                                name="partner_longitude"
-                                                nolabel="1"
-                                                class="oe_inline"
-                                            /></span>
-                                        <br />
-                                        <span
-                                            invisible="not date_localization"
-                                        >Updated on:
-                                            <field
-                                                name="date_localization"
-                                                nolabel="1"
-                                                readonly="1"
-                                                class="oe_inline"
-                                            />
-                                            <br />
-                                        </span>
-                                        <button
-                                            invisible="(partner_latitude != 0) or (partner_longitude != 0)"
-                                            icon="fa-gear"
-                                            string="Compute based on address"
-                                            title="Compute Localization"
-                                            name="geo_localize"
-                                            type="object"
-                                            class="btn btn-link p-0"
-                                        />
-                                        <button
-                                            invisible="partner_latitude == partner_longitude == 0"
-                                            icon="fa-refresh"
-                                            string="Refresh"
-                                            title="Refresh Localization"
-                                            name="geo_localize"
-                                            type="object"
-                                            class="btn btn-link p-0"
-                                        />
-                                    </div>
-                                </group>
-                            </group>
                         </page>
                     </notebook>
                 </sheet>
@@ -278,84 +211,301 @@
             </form>
         </field>
     </record>
-    <!-- Field Service Location Search View-->
-    <record id="fsm_location_search_view" model="ir.ui.view">
-        <field name="name">fsm.location.search</field>
-        <field name="model">fsm.location</field>
+    <record id="fsm_order_tree_view" model="ir.ui.view">
+        <field name="name">fsm.order.tree</field>
+        <field name="model">fsm.order</field>
         <field name="arch" type="xml">
-            <search string="Search FSM Location">
+            <tree name="orders" default_order="scheduled_date_start">
+                <field name="scheduled_date_start" />
+                <field name="name" />
+                <field name="location_id" />
+                <field name="person_id" />
+                <field name="stage_id" string="Stage" />
+                <field name="company_id" groups="base.group_multi_company" />
+            </tree>
+        </field>
+    </record>
+    <record id="action_fsm_operation_order" model="ir.actions.act_window">
+        <field name="name">Orders</field>
+        <field name="res_model">fsm.order</field>
+        <field name="view_mode">tree,form,calendar</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create an Order.
+            </p>
+        </field>
+    </record>
+    <!-- Dashboard -->
+    <record id="fsm_order_kanban_view" model="ir.ui.view">
+        <field name="name">fsm.order.kanban</field>
+        <field name="model">fsm.order</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id" class="o_kanban_small_column">
+                <field
+                    name="stage_id"
+                    options='{"group_by_tooltip": {"description": "Description"}}'
+                />
+                <field name="name" />
+                <field name="priority" />
+                <field name="location_id" />
+                <field name="person_id" />
+                <field name="color" />
+                <templates>
+                    <t t-name="kanban-menu">
+                        <div class="container">
+                            <div class="o_kanban_card_manage_settings row">
+                                <div role="menuitem" aria-haspopup="true" class="col-6">
+                                    <ul
+                                        class="oe_kanban_colorpicker"
+                                        data-field="color"
+                                        role="popup"
+                                    />
+                                </div>
+                                <div role="menuitem" class="col-4">
+                                    <a
+                                        class="dropdown-item"
+                                        role="menuitem"
+                                        type="edit"
+                                    >Edit</a>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-name="kanban-box">
+                        <div
+                            t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click"
+                            name="fsm_equipment"
+                        >
+                            <div class="oe_kanban_content">
+                                <div>
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name" />
+                                    </strong>
+                                </div>
+                                <div>
+                                    <field
+                                        name="tag_ids"
+                                        widget="many2many_tags"
+                                        groups="fieldservice.group_fsm_tag"
+                                        options="{'color_field': 'color'}"
+                                    />
+                                </div>
+                                <div>
+                                    <field name="location_id" />
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <field
+                                            name="priority"
+                                            widget="priority"
+                                            groups="fieldservice.group_fsm_dispatcher"
+                                        />
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field
+                                            name="person_id"
+                                            widget="many2one_avatar_user"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="oe_clear" />
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!-- Search for fsm.order-->
+    <record id="fsm_order_search_view" model="ir.ui.view">
+        <field name="name">fsm.order.search</field>
+        <field name="model">fsm.order</field>
+        <field name="arch" type="xml">
+            <search string="Orders">
+                <filter
+                    string="My Orders"
+                    domain="[('person_id.partner_id.user_ids', '=', uid)]"
+                    name="my_orders"
+                />
+                <separator />
                 <field
                     name="name"
-                    filter_domain="['|', ('ref', 'ilike', self), ('name', 'ilike', self)]"
-                    string="Location"
+                    filter_domain="['|', ('name', 'ilike', self), ('name', '=like', str(self) + '%')]"
+                    string="FSM Order Name"
                 />
-                <field name="partner_id" />
-                <field name="owner_id" />
-                <field name="partner_latitude" />
-                <field name="partner_longitude" />
-                <field name="territory_id" groups="fieldservice.group_fsm_territory" />
+                <field name="location_id" />
                 <field name="branch_id" />
                 <field name="district_id" />
                 <field name="region_id" />
-                <field name="street" />
-                <field name="street2" />
-                <field name="city" />
-                <field name="state_id" />
-                <field name="zip" />
-                <field name="country_id" />
-                <field name="description" />
-                <field name="tz" />
-                <field name="category_id" />
-                <field name="ref" />
+                <field name="team_id" groups="fieldservice.group_fsm_team" />
+                <field name="person_id" />
+                <field name="person_ids" />
+                <separator />
+                <filter
+                    string="To Do"
+                    domain="[('stage_id.is_closed', '=', False)]"
+                    name="todo"
+                />
+                <filter
+                    string="Unassigned"
+                    domain="[('person_id', '=', False), ('stage_id.is_closed', '=', False)]"
+                    name="unassigned"
+                />
+                <filter
+                    string="Unscheduled"
+                    domain="[('scheduled_date_start', '=', False), ('stage_id.is_closed', '=', False)]"
+                    name="unscheduled"
+                />
+                <filter
+                    string="Done"
+                    domain="[('stage_id.is_closed', '=', True)]"
+                    name="done"
+                />
+                <separator />
+                <filter
+                    string="Today Orders"
+                    domain="[
+                    ('scheduled_date_start', '&gt;=', (datetime.datetime.combine(datetime.date.today(), datetime.time(0,0,0)))),
+                    ('scheduled_date_start', '&lt;', (datetime.datetime.combine(datetime.date.today(), datetime.time(23,59,59))))
+                    ]"
+                    name="order_today"
+                />
+                <filter
+                    string="Future Orders"
+                    domain="[('scheduled_date_start', '&gt;=', (datetime.datetime.combine(datetime.date.today(), datetime.time(0,0,0))))]"
+                    name="order_upcoming_all"
+                />
+                <filter
+                    string="Due Within 7 Days"
+                    domain="[
+                    ('scheduled_date_start', '&gt;=', (datetime.datetime.combine(datetime.date.today(), datetime.time(0,0,0)))),
+                    ('scheduled_date_start', '&lt;=', (datetime.datetime.combine((datetime.date.today()+relativedelta(days=6)), datetime.time(23,59,59))))
+                    ]"
+                    name="order_upcoming_week"
+                />
+                <filter
+                    string="Due Within 30 Days"
+                    domain="[
+                    ('scheduled_date_start', '&gt;=',(datetime.datetime.combine(datetime.date.today(), datetime.time(0,0,0)))),
+                    ('scheduled_date_start', '&lt;=', (datetime.datetime.combine((datetime.date.today()+relativedelta(days=29)), datetime.time(23,59,59))))
+                    ]"
+                    name="order_upcoming_month"
+                />
+                <separator />
                 <group expand="0" string="Group By">
                     <filter
-                        name="owner_id"
-                        string="Owner"
-                        domain="[]"
-                        context="{'group_by':'owner_id'}"
+                        name="territory_id"
+                        string="Territory"
+                        domain=""
+                        context="{'group_by':'territory_id'}"
+                        groups="fieldservice.group_fsm_territory"
+                    />
+                    <filter
+                        name="branch_id"
+                        string="Branch"
+                        domain=""
+                        context="{'group_by':'branch_id'}"
+                        groups="fieldservice.group_fsm_territory"
+                    />
+                    <filter
+                        name="district_id"
+                        string="District"
+                        domain=""
+                        context="{'group_by':'district_id'}"
+                        groups="fieldservice.group_fsm_territory"
+                    />
+                    <filter
+                        name="region_id"
+                        string="Region"
+                        domain=""
+                        context="{'group_by':'region_id'}"
+                        groups="fieldservice.group_fsm_territory"
+                    />
+                    <filter
+                        name="fsm_person_id"
+                        domain=""
+                        context="{'group_by':'person_id'}"
                     />
                 </group>
             </search>
         </field>
     </record>
-    <record id="action_fsm_location" model="ir.actions.act_window">
-        <field name="name">Service Locations</field>
-        <field name="res_model">fsm.location</field>
-        <field name="view_id" ref="fsm_location_tree_view" />
-        <field name="view_mode">tree,form</field>
-        <field name="search_view_id" ref="fsm_location_search_view" />
+    <record id="fsm_order_calendar_view" model="ir.ui.view">
+        <field name="name">Orders</field>
+        <field name="model">fsm.order</field>
+        <field name="type">calendar</field>
+        <field name="arch" type="xml">
+            <calendar
+                string="FSM Orders"
+                date_start="scheduled_date_start"
+                date_delay="scheduled_duration"
+                color="stage_id"
+            >
+                <field name="name" />
+                <field name="stage_id" filters="1" />
+                <field name="location_id" />
+                <field name="phone" />
+                <field
+                    name="person_id"
+                    write_model="fsm.person.calendar.filter"
+                    write_field="person_id"
+                    filter_field="person_checked"
+                    avatar_field="image_128"
+                />
+                <field name="team_id" filters="1" />
+                <field name="person_phone" />
+                <field name="city" />
+                <field name="state_name" />
+            </calendar>
+        </field>
+    </record>
+    <record id="action_fsm_dash_order" model="ir.actions.act_window">
+        <field name="name">Orders</field>
+        <field name="res_model">fsm.order</field>
+        <field name="view_mode">kanban,tree,form,calendar</field>
+        <field name="search_view_id" ref="fsm_order_search_view" />
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Create a Service Location
+                Create an Order.
             </p>
         </field>
     </record>
-    <record id="fsm_location_graph_view" model="ir.ui.view">
-        <field name="name">fsm.location.graph</field>
-        <field name="model">fsm.location</field>
+    <!-- Reporting -->
+    <record id="fsm_order_graph_view" model="ir.ui.view">
+        <field name="name">fsm.order.graph</field>
+        <field name="model">fsm.order</field>
         <field name="arch" type="xml">
-            <graph string="FSM Locations" type="bar">
+            <graph string="Service Orders" type="bar">
                 <field name="stage_id" type="row" />
             </graph>
         </field>
     </record>
-    <record id="fsm_location_pivot_view" model="ir.ui.view">
-        <field name="name">fsm.location.pivot</field>
-        <field name="model">fsm.location</field>
+    <record id="fsm_order_pivot_view" model="ir.ui.view">
+        <field name="name">fsm.order.pivot</field>
+        <field name="model">fsm.order</field>
         <field name="arch" type="xml">
-            <pivot string="FSM Locations" display_quantity="true">
+            <pivot string="Service Orders" display_quantity="true">
                 <field name="stage_id" type="row" />
             </pivot>
         </field>
     </record>
-    <record id="action_fsm_report_location" model="ir.actions.act_window">
-        <field name="name">Locations</field>
-        <field name="res_model">fsm.location</field>
-        <field name="view_mode">pivot,graph</field>
+    <record id="action_fsm_report_order" model="ir.actions.act_window">
+        <field name="name">Orders</field>
+        <field name="res_model">fsm.order</field>
+        <field name="view_mode">graph,pivot</field>
         <field name="help" type="html">
             <p>
-                Location Reports.
+                Orders Reports.
             </p>
         </field>
+    </record>
+    <record id="action_report_fsm_order" model="ir.actions.report">
+        <field name="name">Service Order</field>
+        <field name="model">fsm.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">fieldservice.report_fsm_order</field>
+        <field name="report_file">fieldservice.report_fsm_order</field>
+        <field name="print_report_name">'Service Order - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_fsm_order" />
     </record>
 </odoo>
